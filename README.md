@@ -33,21 +33,21 @@ Current "smart" attendance solutions (GPS-only, QR-only, WiFi-only) are all **ea
 │                     CAMPUSCHAIN ECOSYSTEM                       │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐       │
-│  │ 📍 ATTENDANCE │  │ 🔐 HEALTH     │  │ 🎓 CREDENTIALS│       │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐        │
+│  │ 📍 ATTENDANCE │  │ 🔐 HEALTH     │  │ 🎓 CREDENTIALS│      │
 │  │   Multi-factor│  │   ZK Proofs   │  │   NFT Certs   │       │
 │  │   Anti-spoof  │  │   AI Fraud    │  │   Voting      │       │
 │  │   Auto-record │  │   Privacy     │  │   Soulbound   │       │
 │  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘       │
 │          └──────────────────┼──────────────────┘               │
-│                             ▼                                   │
+│                             ▼                                  │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │              🤖 AI VERIFICATION LAYER                    │   │
-│  │    Pattern Detection │ Anomaly Flagging │ Explanations   │   │
+│  │              🤖 AI VERIFICATION LAYER                   │  │
+│  │    Pattern Detection │ Anomaly Flagging │ Explanations   │  │
 │  └─────────────────────────────────────────────────────────┘   │
-│                             ▼                                   │
+│                             ▼                                  │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │              ⛓️ ALGORAND BLOCKCHAIN                      │   │
+│  │              ⛓️ ALGORAND BLOCKCHAIN                      │  │
 │  │     Immutable │ Fast (4.5s) │ Cheap ($0.001) │ Green    │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
