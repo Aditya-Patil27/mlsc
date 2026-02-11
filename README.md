@@ -1,4 +1,4 @@
-# 🏛️ CampusChain — Trust Automated. Fraud Eliminated. Campus Revolutionized.
+# 🏛️ ALETHEIA — Trust Automated. Fraud Eliminated. Campus Revolutionized.
 
 [![Built for Hackspiration'26](https://img.shields.io/badge/Built%20For-Hackspiration'26-blueviolet)]()
 [![Blockchain](https://img.shields.io/badge/Blockchain-Algorand-00D4AA)]()
