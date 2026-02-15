@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
       validFrom,
       validTo,
       credentialType,
+      documentUrl,
     } = body;
 
     if (
@@ -112,6 +113,7 @@ export async function POST(request: NextRequest) {
       issuer_hash: issuerHash,
       credential_type_hash: credentialTypeHash,
       tx_hash: txHash,
+      document_url: documentUrl || undefined,
       status: "valid",
     });
 

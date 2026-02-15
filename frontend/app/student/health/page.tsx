@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge, Progress } from "@/components/ui";
 import { WaxSeal } from "@/components/shared/wax-seal";
 import { BlockchainBadge } from "@/components/shared/blockchain-badge";
+import { DocumentUpload, UploadResult } from "@/components/shared/document-upload";
 import { mockHealthCredentials } from "@/data/mock/health";
 import { cn, delay } from "@/lib/utils";
 import {
@@ -22,9 +23,13 @@ import {
   Loader2,
   Sparkles,
   ArrowRight,
+  Upload,
+  FileImage,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 
-type Step = "select" | "configure" | "generating" | "success";
+type Step = "select" | "upload" | "review-ocr" | "configure" | "generating" | "success";
 
 export default function HealthPage() {
   const [step, setStep] = useState<Step>("select");
@@ -36,6 +41,7 @@ export default function HealthPage() {
     isFirstTimeUse: true,
   });
   const [generatedProof, setGeneratedProof] = useState<string | null>(null);
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
 
   const credential = mockHealthCredentials.find((c) => c.id === selectedCredential);
 
@@ -51,6 +57,17 @@ export default function HealthPage() {
     ).join("");
     setGeneratedProof(proof);
     setStep("success");
+  };
+
+  const handleUploadComplete = (result: UploadResult) => {
+    setUploadResult(result);
+    setStep("review-ocr");
+  };
+
+  const handleConfirmUpload = () => {
+    // After reviewing OCR, go to configure step
+    // In a full implementation, this would create the credential via API
+    setStep("configure");
   };
 
   return (
@@ -75,15 +92,41 @@ export default function HealthPage() {
         </p>
       </motion.div>
 
-      {/* Step 1: Select Credential */}
+      {/* Steps */}
       <AnimatePresence mode="wait">
+        {/* Step 1: Select Credential */}
         {step === "select" && (
           <motion.div
             key="select"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
+            className="space-y-4"
           >
+            {/* Upload New Credential Card */}
+            <Card variant="elevated">
+              <CardContent className="p-6">
+                <div
+                  onClick={() => setStep("upload")}
+                  className="flex items-center gap-4 cursor-pointer group"
+                >
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-gold/20 to-crimson/20 group-hover:from-gold/30 group-hover:to-crimson/30 transition-all">
+                    <Upload className="w-8 h-8 text-gold" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-heading font-semibold text-walnut text-lg group-hover:text-gold transition-colors">
+                      Upload New Credential
+                    </p>
+                    <p className="text-sm text-walnut/60">
+                      Upload a medical document for OCR verification and create a new credential
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-walnut/40 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Existing Credentials */}
             <Card variant="certificate">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -147,8 +190,165 @@ export default function HealthPage() {
           </motion.div>
         )}
 
+        {/* Step 1b: Upload Document */}
+        {step === "upload" && (
+          <motion.div
+            key="upload"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <Card variant="certificate">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileImage className="w-5 h-5 text-gold" />
+                  Upload Medical Document
+                </CardTitle>
+                <p className="text-sm text-walnut/60">
+                  Upload a medical certificate or doctor&apos;s note. The document
+                  will be scanned using OCR to extract and verify key information.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <DocumentUpload
+                  onUploadComplete={handleUploadComplete}
+                  onCancel={() => setStep("select")}
+                />
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Step 1c: Review OCR Results */}
+        {step === "review-ocr" && uploadResult && (
+          <motion.div
+            key="review-ocr"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-4"
+          >
+            {/* Verification Status */}
+            <Card variant="elevated">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  {uploadResult.verification?.isVerified ? (
+                    <div className="p-3 rounded-full bg-verified/10">
+                      <CheckCircle2 className="w-8 h-8 text-verified" />
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-full bg-pending/10">
+                      <AlertTriangle className="w-8 h-8 text-pending" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-heading text-xl text-walnut">
+                      {uploadResult.verification?.isVerified
+                        ? "Document Verified"
+                        : "Review Required"}
+                    </h3>
+                    <p className="text-sm text-walnut/60">
+                      OCR confidence: {uploadResult.ocr.confidence}% •
+                      Verification: {uploadResult.verification?.confidence ?? "N/A"}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mismatches */}
+                {uploadResult.verification?.mismatches &&
+                  uploadResult.verification.mismatches.length > 0 && (
+                    <div className="space-y-2 mb-4">
+                      <p className="text-sm font-medium text-walnut/70">
+                        Potential issues:
+                      </p>
+                      {uploadResult.verification.mismatches.map((m, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
+                            m.severity === "high"
+                              ? "bg-rejected/10 text-rejected"
+                              : m.severity === "medium"
+                                ? "bg-pending/10 text-pending"
+                                : "bg-walnut/5 text-walnut/60"
+                          )}
+                        >
+                          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                          <span>
+                            <strong>{m.field}:</strong>{" "}
+                            {m.found ? `Found "${m.found}"` : "Not found"} •
+                            Expected: {m.expected}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </CardContent>
+            </Card>
+
+            {/* Extracted Fields */}
+            <Card variant="certificate">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-gold" />
+                  Extracted Information
+                </CardTitle>
+                <p className="text-sm text-walnut/60">
+                  Review the data extracted from your document
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3">
+                  {[
+                    { label: "Patient Name", value: uploadResult.ocr.extractedFields.patientName },
+                    { label: "Hospital / Issuer", value: uploadResult.ocr.extractedFields.hospitalName },
+                    { label: "Doctor", value: uploadResult.ocr.extractedFields.doctorName },
+                    { label: "Date From", value: uploadResult.ocr.extractedFields.dateFrom },
+                    { label: "Date To", value: uploadResult.ocr.extractedFields.dateTo },
+                    { label: "Diagnosis", value: uploadResult.ocr.extractedFields.diagnosis },
+                  ].map((field) => (
+                    <div
+                      key={field.label}
+                      className="flex items-center justify-between p-3 rounded-lg bg-parchment-dark/30"
+                    >
+                      <span className="text-sm text-walnut/60">{field.label}</span>
+                      <span className="text-sm font-medium text-walnut">
+                        {field.value || (
+                          <span className="italic text-walnut/40">Not detected</span>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-4 space-y-3">
+                  <Button
+                    variant="ceremonial"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleConfirmUpload}
+                  >
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                    Confirm & Continue
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      setUploadResult(null);
+                      setStep("upload");
+                    }}
+                  >
+                    Upload Different Document
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Step 2: Configure Claims */}
-        {step === "configure" && credential && (
+        {step === "configure" && (credential || uploadResult) && (
           <motion.div
             key="configure"
             initial={{ opacity: 0, x: 20 }}
@@ -228,7 +428,14 @@ export default function HealthPage() {
                 {[
                   { key: "hasValidCredential", label: "I have a valid medical credential" },
                   { key: "fromAuthorizedIssuer", label: "Issued by an authorized hospital" },
-                  { key: "coversDateRange", label: `Covers ${new Date(credential.validFrom).toLocaleDateString()} - ${new Date(credential.validTo).toLocaleDateString()}` },
+                  {
+                    key: "coversDateRange",
+                    label: credential
+                      ? `Covers ${new Date(credential.validFrom).toLocaleDateString()} - ${new Date(credential.validTo).toLocaleDateString()}`
+                      : uploadResult
+                        ? `Covers ${uploadResult.ocr.extractedFields.dateFrom || "N/A"} - ${uploadResult.ocr.extractedFields.dateTo || "N/A"}`
+                        : "Covers requested date range",
+                  },
                   { key: "isFirstTimeUse", label: "First time using this credential" },
                 ].map((claim) => (
                   <label
@@ -300,16 +507,16 @@ export default function HealthPage() {
                     "Building Merkle tree...",
                     "Generating witness...",
                     "Computing proof...",
-                  ].map((step, index) => (
+                  ].map((stepText, index) => (
                     <motion.div
-                      key={step}
+                      key={stepText}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.7 }}
                       className="flex items-center gap-2 text-walnut/60"
                     >
                       <Loader2 className="w-4 h-4 animate-spin text-gold" />
-                      {step}
+                      {stepText}
                     </motion.div>
                   ))}
                 </div>
@@ -379,6 +586,7 @@ export default function HealthPage() {
                       setStep("select");
                       setSelectedCredential(null);
                       setGeneratedProof(null);
+                      setUploadResult(null);
                     }}
                   >
                     Generate Another Proof
