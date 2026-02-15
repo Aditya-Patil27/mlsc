@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui";
 import { WaxSeal } from "@/components/shared/wax-seal";
+import { ConnectWalletButton } from "@/components/shared/connect-wallet-button";
 import {
   Shield,
   Award,
@@ -59,6 +60,7 @@ export default function LandingPage() {
             <Link href="/login" className="text-parchment/70 hover:text-parchment transition-colors">
               Login
             </Link>
+            <ConnectWalletButton />
             <Button variant="ceremonial" size="sm" asChild>
               <Link href="/login">Get Started</Link>
             </Button>

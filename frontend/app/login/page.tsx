@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { Button, Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui";
 import { WaxSeal } from "@/components/shared/wax-seal";
+import { ConnectWalletButton } from "@/components/shared/connect-wallet-button";
 import { UserRole } from "@/types";
 import { GraduationCap, BookOpen, Settings, ChevronRight, Loader2 } from "lucide-react";
 
@@ -99,11 +100,10 @@ export default function LoginPage() {
             >
               <Card
                 variant="elevated"
-                className={`cursor-pointer transition-all duration-300 ${
-                  selectedRole === roleOption.role
+                className={`cursor-pointer transition-all duration-300 ${selectedRole === roleOption.role
                     ? "ring-2 ring-gold shadow-lg"
                     : "hover:shadow-md hover:-translate-y-0.5"
-                }`}
+                  }`}
                 onClick={() => !isSubmitting && handleLogin(roleOption.role)}
               >
                 <CardContent className="flex items-center gap-4 p-6">
@@ -136,12 +136,23 @@ export default function LoginPage() {
           ))}
         </div>
 
+        {/* Pera Wallet Connection */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col items-center gap-3 mt-8"
+        >
+          <p className="text-sm text-walnut/50">Or connect your Algorand wallet</p>
+          <ConnectWalletButton />
+        </motion.div>
+
         {/* Demo Notice */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="text-center text-sm text-walnut/50 mt-8"
+          className="text-center text-sm text-walnut/50 mt-6"
         >
           Demo Mode: Click any role to enter with pre-filled credentials
         </motion.p>
