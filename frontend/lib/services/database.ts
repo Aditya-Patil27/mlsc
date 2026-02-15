@@ -90,6 +90,7 @@ export interface DbHealthCredential {
   issuer_hash: string;
   credential_type_hash: string;
   tx_hash: string;
+  document_url?: string;
   status: "valid" | "expired" | "revoked";
   created_at: string;
 }

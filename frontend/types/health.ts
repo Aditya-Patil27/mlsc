@@ -33,6 +33,7 @@ export interface HealthCredential {
     credentialTypeHash: string;
   };
   txHash: string;           // On-chain credential
+  documentUrl?: string;     // Uploaded medical document (Supabase Storage)
   status: "valid" | "expired" | "revoked";
 }
 

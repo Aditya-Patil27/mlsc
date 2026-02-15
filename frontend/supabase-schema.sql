@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS health_credentials (
   issuer_hash TEXT NOT NULL,
   credential_type_hash TEXT NOT NULL,
   tx_hash TEXT NOT NULL,
+  document_url TEXT,
   status TEXT NOT NULL DEFAULT 'valid' CHECK (status IN ('valid', 'expired', 'revoked')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
